@@ -53,6 +53,33 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('아직 감지된 음이 없어요'), findsOneWidget);
     expect(find.text('마이크 켜기'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('1번줄 · E4'),
+      250,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('1번줄 · E4'));
+    await tester.pumpAndSettle();
+    expect(find.text('기본 튜닝 (Standard)'), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.text('6번줄 · E2')).dy,
+      lessThan(tester.getTopLeft(find.text('1번줄 · E4')).dy),
+    );
+    await tester.tap(find.text('1번줄 · E4'));
+    await tester.pump();
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.ancestor(
+              of: find.text('1번줄 · E4'),
+              matching: find.byType(ChoiceChip),
+            ),
+          )
+          .selected,
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
   test('Settings and custom tunings survive reload', () async {

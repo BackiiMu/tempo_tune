@@ -7,6 +7,27 @@ import 'package:tempo_tune/features/tuner/domain/pitch.dart';
 import 'package:tempo_tune/features/tuner/data/tunings.dart';
 
 void main() {
+  test(
+    'Beginner tuning labels preserve saved names and physical string numbers',
+    () {
+      final standard = tunings.first;
+      expect(standard.stringNumber(0), 6);
+      expect(standard.notes[0], 40); // Thick sixth string E2.
+      expect(standard.stringNumber(5), 1);
+      expect(standard.notes[5], 64); // Thin first string E4.
+      final halfDown = tunings.firstWhere((t) => t.name == 'Half Step Down');
+      expect(halfDown.displayName, '하프다운 (Half Step Down)');
+      expect(halfDown.explanation, contains('반음씩'));
+      expect(halfDown.toJson()['name'], 'Half Step Down');
+      for (final tuning in tunings) {
+        expect(tuning.explanation, isNotEmpty);
+        expect(tuning.stringNumber(tuning.notes.length - 1), 1);
+      }
+      const custom = Tuning('사용자 정의', '내 튜닝', [40, 45], custom: true);
+      expect(custom.displayName, '내 튜닝');
+    },
+  );
+
   test('Tap tempo 500 / 600 / 750 ms, debounce, reset, tempo changes', () {
     for (final entry in {500: 120, 600: 100, 750: 80}.entries) {
       final t = TapTracker();

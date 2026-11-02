@@ -128,34 +128,57 @@ extension _TunerPage on _PracticeHomeState {
               dropdown(
                 '${tuning.instrument}/${tuning.name}',
                 choices.map((t) => '${t.instrument}/${t.name}').toList(),
-                (v) => v.split('/').last,
+                (v) => choices
+                    .firstWhere((t) => '${t.instrument}/${t.name}' == v)
+                    .displayName,
                 (v) => selectTuning(
                   allTunings.firstWhere(
                     (t) => '${t.instrument}/${t.name}' == v,
                   ),
                 ),
               ),
-              const SizedBox(height: 20),
-              Wrap(
-                spacing: 8,
-                runSpacing: 10,
-                children: [
-                  ChoiceChip(
-                    label: const Text('자동'),
-                    selected: manualString < 0,
-                    onSelected: (_) => update(() => manualString = -1),
+              const SizedBox(height: 12),
+              Text(
+                tuning.explanation,
+                style: const TextStyle(color: muted, fontSize: 13, height: 1.6),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerLeft,
+                child: ChoiceChip(
+                  label: const Text('자동 줄 찾기'),
+                  selected: manualString < 0,
+                  onSelected: (_) => update(() => manualString = -1),
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (tuning.instrument.contains('기타') ||
+                  tuning.instrument.contains('베이스'))
+                const Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    '위쪽은 두꺼운 줄, 아래쪽은 얇은 줄이에요.\n1번줄은 가장 아래의 얇은 줄이에요.',
+                    style: TextStyle(color: muted, fontSize: 12, height: 1.6),
                   ),
-                  ...List.generate(
-                    tuning.notes.length,
-                    (i) => ChoiceChip(
-                      label: Text(
-                        '${i + 1} · ${noteName(tuning.notes[i], flats: store.get('flats', false))}${tuned.contains(i) ? ' ✓' : ''}',
+                ),
+              ...List.generate(
+                tuning.notes.length,
+                (i) => Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: ChoiceChip(
+                      label: SizedBox(
+                        width: double.infinity,
+                        child: Text(
+                          '${tuning.stringNumber(i)}번줄 · ${noteName(tuning.notes[i], flats: store.get('flats', false))}${tuned.contains(i) ? ' ✓' : ''}',
+                        ),
                       ),
                       selected: manualString == i,
                       onSelected: (_) => update(() => manualString = i),
                     ),
                   ),
-                ],
+                ),
               ),
               const SizedBox(height: 14),
               Text(
@@ -249,8 +272,8 @@ extension _TunerPage on _PracticeHomeState {
               TextField(
                 controller: notes,
                 decoration: InputDecoration(
-                  labelText: '낮은 줄부터 음정 입력',
-                  helperText: '예: D2 A2 D3 G3 B3 E4',
+                  labelText: '위쪽 줄부터 음정 입력',
+                  helperText: '기타는 두꺼운 줄부터 · 예: D2 A2 D3 G3 B3 E4',
                   errorText: validation,
                 ),
               ),
